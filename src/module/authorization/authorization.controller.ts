@@ -3,7 +3,7 @@ import { createAccountDto } from './dto/create-account.dto';
 import { requestPasswordResetDto } from './dto/request-password-reset.dto';
 import { resetPasswordDto } from './dto/reset-password.dto';
 
-@Controller('authorization')
+@Controller('auth')
 export class AuthorizationController {
 
   @Post('/sign-up')
@@ -13,6 +13,7 @@ export class AuthorizationController {
 
   @Get('/verify-email')
   async verifyEmail(@Param('id') id:string): Promise<object> {
+    console.log("here")
     return await {}
   }
 
