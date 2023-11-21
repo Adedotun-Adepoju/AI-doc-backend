@@ -8,7 +8,7 @@ import { DoctorsModule } from './module/doctors/doctors.module';
 
 @Module({
   imports: [AuthorizationModule, ChatModule, PatientsModule, DoctorsModule],
-  controllers: [AppController],
+  controllers: [AppController,],
   providers: [AppService],
 })
 export class AppModule {}
