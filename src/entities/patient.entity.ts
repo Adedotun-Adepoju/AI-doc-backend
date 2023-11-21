@@ -3,12 +3,19 @@ import {
   Column, 
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn } from "typeorm";
+  UpdateDateColumn, 
+  OneToOne,
+  JoinColumn } from "typeorm";
+
+import { User } from "./user.entity";
 
 @Entity()
 export class Patient {
   @PrimaryGeneratedColumn('uuid')
   public id: string
+
+  @Column()
+  public user_id: string 
 
   @Column({
     type: "int"
@@ -33,4 +40,8 @@ export class Patient {
     default: () => 'CURRENT_TIMESTAMP',
   })
   public updated_at: Date;
+
+  @OneToOne(() => User)
+  @JoinColumn({ name: "user_id"})
+  user: User
 }

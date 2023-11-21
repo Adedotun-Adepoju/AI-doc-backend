@@ -4,7 +4,10 @@ import {
   Unique,
   PrimaryGeneratedColumn, 
   CreateDateColumn, 
-  UpdateDateColumn } from "typeorm";
+  UpdateDateColumn,
+} from "typeorm";
+
+import { Patient } from "./patient.entity";
 
 @Entity()
 @Unique(['email'])
@@ -38,4 +41,5 @@ export class User {
     name: 'updated_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
+  public updated_at: Date;
 }
