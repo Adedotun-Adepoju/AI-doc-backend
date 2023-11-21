@@ -5,9 +5,16 @@ import { AuthorizationModule } from './module/authorization/authorization.module
 import { ChatModule } from './module/chat/chat.module';
 import { PatientsModule } from './module/patients/patients.module';
 import { DoctorsModule } from './module/doctors/doctors.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthorizationModule, ChatModule, PatientsModule, DoctorsModule],
+  imports: [
+    AuthorizationModule, 
+    ChatModule, 
+    PatientsModule, 
+    DoctorsModule,     
+    ConfigModule.forRoot({ isGlobal: true }),
+  ],
   controllers: [AppController,],
   providers: [AppService],
 })
