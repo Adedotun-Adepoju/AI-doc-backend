@@ -7,8 +7,6 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
-import { Patient } from "./patient.entity";
-
 @Entity()
 @Unique(['email'])
 export class User {
