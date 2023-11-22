@@ -1,10 +1,15 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, HttpStatus } from '@nestjs/common';
 import { createAccountDto } from './dto/create-account.dto';
 import { requestPasswordResetDto } from './dto/request-password-reset.dto';
 import { resetPasswordDto } from './dto/reset-password.dto';
+import { loginDto } from './dto/login.dto';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
+  constructor(
+    private authService: AuthService
+  ){}
 
   @Post('/sign-up')
   
@@ -27,4 +32,10 @@ export class AuthController {
   async resetPassword(@Body() passwordResetDto: resetPasswordDto): Promise<object> {
     return await {}
   }  
+
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  async signIn(@Body() signInDto: loginDto) {
+    return await this.authService.signIn(signInDto.email, signInDto.password)
+  }
 }
