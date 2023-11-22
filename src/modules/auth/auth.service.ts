@@ -3,12 +3,21 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/entities/user.entity';
+import { MailerService } from '../mailer/mailer.service';
+import { EmailVerification } from 'src/entities/email_verification.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { VerificationStatus } from 'src/entities/email_verification.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
       private usersService:UsersService,
       private jwtService: JwtService,
+      private mailerService: MailerService,
+
+      @InjectRepository(EmailVerification)
+      private emailVerificationRepo: Repository<EmailVerification>
   ){}
 
   async login(user: any): Promise<any> {
@@ -34,7 +43,7 @@ export class AuthService {
 
     if(user && isPasswordValid){
       const { password, ...result } = user;
-      return result
+      return result;
     }
   }
 
@@ -47,6 +56,168 @@ export class AuthService {
       hashedPassword
     )
 
+    // Todo: Create email verification record
+    const verification = this.emailVerificationRepo.create({
+      email: payload.email,
+      status: VerificationStatus.NOT_VERIFIED,
+      user: newUser
+    })
+
+    await this.emailVerificationRepo.save(verification)
+    // Send email verification
+    const url = process.env.BASE_URL
+    const verificationId = verification.id 
+
+    const emailContent = await this.generateWelcomeEmail(newUser.first_name, newUser.last_name, url, verificationId)
+    this.mailerService.sendMail('d.e.adepoju@gmail.com', "Email verification", emailContent)
+
     return newUser
+  }
+
+  async verifyEmail(verificationId: string){
+    const verification = await this.emailVerificationRepo.findOneBy({ id: verificationId })
+
+    if(!verification){
+      return {
+        status: "error",
+        message: "verification does not exist"
+      }
+    }
+
+    verification.status = VerificationStatus.VERIFIED
+    await this.emailVerificationRepo.save(verification)
+
+    const emailContent = await this.generateSuccessfulVerificationEmail()
+    this.mailerService.sendMail('d.e.adepoju@gmail.com', "Welcome to AI-Doc", emailContent)
+
+    return {
+      status: "success",
+      message: "Email verified successfully"
+    }
+  }
+
+  async generateWelcomeEmail(firstName:string, lastName: string, url:string, verificationId: string) {
+    const emailContent = `
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email Template</title>
+        <style>
+          body {
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #333;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+          }
+          img {
+            max-width: 100%;
+            height: auto;
+          }
+          .btn-container {
+            text-align: center;
+            margin: 35px 0;
+          }
+          a.btn {
+            text-decoration: none;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 15px;
+            line-height: 18px;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <img src="https://www.revechat.com/wp-content/uploads/2021/11/chatbots-for-healthcare-1.png" alt="Company Logo" style="margin-bottom: 20px;">
+      
+          <h1 style="color: #007bff;">Welcome to AI Doc</h1>
+      
+          <p>Hello ${firstName} ${lastName},</p>
+      
+          <p>Thank you for choosing AI-Doc as your personal healthcare assistant. We look forward to working alongside you but before we get started, we need to confirm that this is you</p>
+          
+          <p>Please click the button below to verify your email.</p>
+
+          <div class="btn-container" style="margin-top: 18px">
+            <a href="${url}/auth/verify-email/${verificationId}" class="btn">Verify Email</a>
+          </div>
+
+          <p>Best regards,<br>AI-doc</p>
+      
+          <p style="font-size: 12px; color: #777;">This is a system generated message. Do not reply.</p>
+        </div>
+      </body>
+      </html>
+  `;
+
+  return emailContent;
+  }
+
+  async generateSuccessfulVerificationEmail(){
+    const appUrl = process.env.APP_URL
+
+    const emailContent = `
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body {
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #333;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+          }
+          img {
+            max-width: 100%;
+            height: auto;
+          }
+          .btn-container {
+            text-align: center;
+            margin: 35px 0;
+          }
+          a.btn {
+            text-decoration: none;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 15px;
+            line-height: 18px;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <img src="https://www.revechat.com/wp-content/uploads/2021/11/chatbots-for-healthcare-1.png" alt="Company Logo" style="margin-bottom: 20px;">
+      
+          <h1 style="color: #007bff;">Welcome to AI Doc</h1>
+      
+          <p class="text">Thank you for choosing AI-Doc! The <a href="${appUrl}">Ai-Doc portal</a> is where you can login to access healthcare assistance from AI-Doc.
+      
+          <p>Thank you for choosing AI-Doc as your personal healthcare assistant. We look forward to working with you</p>
+
+          <p>Best regards,<br>AI-doc</p>
+      
+          <p style="font-size: 12px; color: #777;">This is a system generated message. Do not reply.</p>
+        </div>
+      </body>
+      </html>
+  `;
+
+  return emailContent
   }
 }
