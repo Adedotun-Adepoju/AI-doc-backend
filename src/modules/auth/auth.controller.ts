@@ -1,10 +1,13 @@
-import { Body, Controller, Get, HttpCode, Param, Post, HttpStatus, HttpException } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, HttpStatus, HttpException, UseGuards, Request } from '@nestjs/common';
 import { createAccountDto } from './dto/create-account.dto';
 import { requestPasswordResetDto } from './dto/request-password-reset.dto';
 import { resetPasswordDto } from './dto/reset-password.dto';
 import { loginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
 import { ResponseDto, ResponseHelper } from 'src/helper/response.helper';
+import { AuthGuard } from '@nestjs/passport';
+import { LocalAuthGuard } from './local-auth.guard';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -13,7 +16,7 @@ export class AuthController {
   ){}
 
   @Post('/sign-up')
-  
+
   async signUp(@Body() createAccountDto: createAccountDto): Promise<ResponseDto> {
     try {
       const user = await this.authService.signUp(createAccountDto)
@@ -21,7 +24,6 @@ export class AuthController {
     } catch(error){
       throw new HttpException(error.message, error.status);
     }
-
   }
 
   @Get('/verify-email')
@@ -40,9 +42,15 @@ export class AuthController {
     return await {}
   }  
 
-  @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signIn(@Body() signInDto: loginDto) {
-    return await this.authService.signIn(signInDto.email, signInDto.password)
+  @UseGuards(LocalAuthGuard)
+  async signIn(@Request() req) {
+    try {
+      const data = await this.authService.login(req.user)
+      return ResponseHelper.successResponse('Login successful', data);
+    }catch (error){
+      throw new HttpException(error.message, error.status);
+    }
+
   }
 }

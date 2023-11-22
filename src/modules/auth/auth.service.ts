@@ -11,28 +11,30 @@ export class AuthService {
       private jwtService: JwtService,
   ){}
 
-  async signIn(email: string, pass: string): Promise<any> {
-    const user = await this.usersService.findUser(email);
+  async login(user: any): Promise<any> {
+    const payload = {
+      sub: user.id,
+      username: user.email
+    }
 
-    if(!user){
-      throw new UnauthorizedException()
+    return {
+      user,
+      access_token: this.jwtService.sign(payload)
+    }
+  }
+
+  async validateUser(email: string, pass:string): Promise<Partial<User>> {
+    const user = await this.usersService.findUser(email)
+
+    if(!user) {
+      return null 
     }
 
     const isPasswordValid = await bcrypt.compare(pass, user.password)
 
-    if(!isPasswordValid) {
-      console.log("Wrong")
-      throw new UnauthorizedException()
-    }
-
-    // TODO: Generate a JWT and return it here instead of the user object
-    const payload = {
-      sub: user.id,
-      email: user.email
-    }
-
-    return {
-      access_token: await this.jwtService.signAsync(payload)
+    if(user && isPasswordValid){
+      const { password, ...result } = user;
+      return result
     }
   }
 
