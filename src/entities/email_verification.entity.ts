@@ -14,7 +14,7 @@ export enum VerificationStatus {
   VERIFIED = "verified",
   NOT_VERIFIED = "not_verified"
 }
-@Entity()
+@Entity({ name: "email_verifications"})
 export class EmailVerification {
   @PrimaryGeneratedColumn('uuid')
   public id: string

@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
-@Entity()
+@Entity({ name: "password_resets"})
 export class PasswordReset {
   @PrimaryGeneratedColumn('uuid')
   public id: string 
