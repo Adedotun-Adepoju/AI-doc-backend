@@ -4,9 +4,10 @@ import { requestPasswordResetDto } from './dto/request-password-reset.dto';
 import { resetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
-export class AuthorizationController {
+export class AuthController {
 
   @Post('/sign-up')
+  
   async signUp(@Body() createAccountDto: createAccountDto): Promise<object> {
     return await {}
   }
