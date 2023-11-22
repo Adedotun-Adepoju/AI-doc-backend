@@ -19,4 +19,22 @@ export class UsersService {
 
     return user
   }
+
+  async createUser(firstName:string, lastName:string, email: string, pass) {
+    const user = this.userRepo.create({
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      password: pass
+    })
+
+    await this.userRepo.save(user)
+
+    return {
+      id: user.id,
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+    }
+  }
 }
