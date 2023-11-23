@@ -16,25 +16,24 @@ export class AuthController {
   ){}
 
   @Post('/sign-up')
-
   async signUp(@Body() createAccountDto: createAccountDto): Promise<ResponseDto> {
     try {
       const user = await this.authService.signUp(createAccountDto)
       return ResponseHelper.successResponse('User created successfully', user);
     } catch(error){
+      console.log(error)
       throw new HttpException(error.message, error.status);
     }
   }
 
-  @Get('/verify-email')
+  @Get('/verify-email/:id')
   async verifyEmail(@Param('id') id:string): Promise<object> {
-    console.log("here")
-    return await {}
+    return await this.authService.verifyEmail(id)
   }
 
   @Post('/password/request-reset')
   async snedResetLink(@Body() passwordResetDto: requestPasswordResetDto): Promise<object> {
-    return await {}
+    return await {};
   }  
 
   @Post('/password/reset')
