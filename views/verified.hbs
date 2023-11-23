@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          font-size: 16px;
+          line-height: 1.5;
+          color: #333;
+          margin: 0;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          -ms-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        img {
+          max-width: 100%;
+          height: auto;
+        }
+        .btn-container {
+          text-align: center;
+          margin: 35px 0;
+        }
+        a.btn {
+          text-decoration: none;
+          background-color: #007bff;
+          color: #fff;
+          font-size: 15px;
+          line-height: 18px;
+          font-weight: 600;
+          padding: 10px;
+          border-radius: 10px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <img src="https://www.revechat.com/wp-content/uploads/2021/11/chatbots-for-healthcare-1.png" alt="Company Logo" style="margin-bottom: 20px;">
+
+        <h1 style="color: #007bff;">Welcome to AI Doc, {{data.first_name}}</h1>
+    
+        <p class="text">Your Email has been verified. The <a href={{data.appUrl}}>Ai-Doc portal</a> is where you can login to access healthcare assistance from AI-Doc.
+    
+        <p>Thank you for choosing AI-Doc as your personal healthcare assistant. We look forward to working with you</p>
+
+        <p>Best regards,<br>AI-doc</p>
+    
+        <p style="font-size: 12px; color: #777;">This is a system generated message. Do not reply.</p>
+      </div>
+    </body>
+    </html>

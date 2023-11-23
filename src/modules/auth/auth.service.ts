@@ -69,7 +69,7 @@ export class AuthService {
     const verificationId = verification.id 
 
     const emailContent = await this.generateWelcomeEmail(newUser.first_name, newUser.last_name, url, verificationId)
-    this.mailerService.sendMail('d.e.adepoju@gmail.com', "Email verification", emailContent)
+    this.mailerService.sendMail(payload.email, "Verify Email Address for AI-Doc", emailContent)
 
     return newUser
   }
@@ -84,15 +84,22 @@ export class AuthService {
       }
     }
 
+    const user = await this.usersService.findUser(verification.email)
+
     verification.status = VerificationStatus.VERIFIED
     await this.emailVerificationRepo.save(verification)
 
     const emailContent = await this.generateSuccessfulVerificationEmail()
-    this.mailerService.sendMail('d.e.adepoju@gmail.com', "Welcome to AI-Doc", emailContent)
+    this.mailerService.sendMail(user.email, "Verification successful", emailContent)
 
     return {
       status: "success",
-      message: "Email verified successfully"
+      message: "Email verified successfully",
+      data: {
+        first_name: user.first_name,
+        last_name: user.last_name,
+        app_url: process.env.APP_URL
+      }
     }
   }
 

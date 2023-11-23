@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, HttpStatus, HttpException, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, HttpStatus, HttpException, UseGuards, Request, Res, Render } from '@nestjs/common';
 import { createAccountDto } from './dto/create-account.dto';
 import { requestPasswordResetDto } from './dto/request-password-reset.dto';
 import { resetPasswordDto } from './dto/reset-password.dto';
@@ -8,6 +8,8 @@ import { ResponseDto, ResponseHelper } from 'src/helper/response.helper';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { join } from 'path'
+import { Response } from 'express'
 
 @Controller('auth')
 export class AuthController {
@@ -27,8 +29,13 @@ export class AuthController {
   }
 
   @Get('/verify-email/:id')
-  async verifyEmail(@Param('id') id:string): Promise<object> {
-    return await this.authService.verifyEmail(id)
+  @Render('verified')
+  async verifyEmail(@Param('id') id:string, @Res() res: Response): Promise<object> {
+    const { status, message, data } =  await this.authService.verifyEmail(id)
+    if(status == "error"){
+      throw new Error('An error occured');
+    }
+    return { data: data }
   }
 
   @Post('/password/request-reset')
